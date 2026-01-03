@@ -1,0 +1,227 @@
+/* --- styles.css --- */
+/* A centralized stylesheet for the Jackaroo Masterpiece application */
+
+/* ==========================================================================
+   Theme Variables (Color Palette & Typography) using JavaFX Looked-Up Colors
+   ========================================================================== */
+.root-layout {
+    /* --- Define Variables Here --- */
+    -fx-primary-background: #282c34;
+    -fx-secondary-background: #383c44;
+    -fx-accent-color: #61AFEF;      /* A professional, vibrant blue */
+    -fx-accent-color-glow: rgba(97, 175, 239, 0.7);
+    -fx-text-color: #ABB2BF;         /* A softer, off-white text color */
+    -fx-text-color-bright: #E6E6E6;
+
+    -fx-font-header: "Oswald";
+    -fx-font-body: "Roboto";
+
+    /* --- Apply Base Styles --- */
+    -fx-background-color: -fx-primary-background;
+    -fx-font-family: -fx-font-body;
+}
+
+
+/* ==========================================================================
+   Game Board & Cells
+   ========================================================================== */
+/* <<< CHANGE: The .board-background style block has been removed. */
+
+.grid-placeholder {
+    -fx-background-color: transparent;
+}
+
+
+/* ==========================================================================
+   Player Area & Components
+   ========================================================================== */
+.player-area {
+    -fx-background-color: -fx-secondary-background;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 6, 0, 0, 2);
+    -fx-padding: 12;
+    -fx-border-color: #50545A; /* Default, inactive border */
+}
+
+/* Style for the RED player area's border */
+.red-player-area {
+    -fx-border-color: #8C1C13; /* A deep, non-distracting red */
+}
+
+/* Style for the GREEN player area's border */
+.green-player-area {
+    -fx-border-color: #2E5339; /* A deep, forest green */
+}
+
+/* Style for the BLUE player area's border */
+.blue-player-area {
+    -fx-border-color: #1E3A8A; /* A rich, dark blue */
+}
+
+/* Style for the YELLOW player area's border */
+.yellow-player-area {
+    -fx-border-color: #B47D14; /* A dark, goldenrod yellow */
+}
+
+/* Base properties for any active area */
+.player-area.active {
+    -fx-border-width: 3.5;
+}
+
+/* Define the active colors and glow for each player type */
+.red-player-area.active {
+    -fx-border-color: #E53935; /* Brighter Red */
+    -fx-effect: dropshadow(gaussian, rgba(229, 57, 53, 0.7), 15, 0.6, 0, 0);
+}
+
+.green-player-area.active {
+    -fx-border-color: #4CAF50; /* Brighter Green */
+    -fx-effect: dropshadow(gaussian, rgba(76, 175, 80, 0.7), 15, 0.6, 0, 0);
+}
+
+.blue-player-area.active {
+    -fx-border-color: #1E88E5; /* Brighter Blue */
+    -fx-effect: dropshadow(gaussian, rgba(30, 136, 229, 0.7), 15, 0.6, 0, 0);
+}
+
+.yellow-player-area.active {
+    -fx-border-color: #FDD835; /* Brighter Yellow */
+    -fx-effect: dropshadow(gaussian, rgba(253, 216, 53, 0.7), 15, 0.6, 0, 0);
+}
+
+/* --- CPU Card Back --- */
+.cpu-card-back {
+    -fx-border-color: #B0BEC5;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-background-color:
+        radial-gradient(center 50% 50%, radius 40%, #78909C, transparent),
+        linear-gradient(from 0% 0% to 100% 100%, #455A64, #263238);
+}
+
+
+/* ==========================================================================
+   Cards & Tooltips
+   ========================================================================== */
+.card-view {
+    -fx-background-color: #F9F9F7;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: rgba(0,0,0,0.2);
+    -fx-border-width: 1.0;
+}
+
+.card-view.selected {
+    -fx-border-color: #FFD700;
+    -fx-border-width: 3.0;
+}
+
+.game-tooltip {
+    -fx-background-color: rgba(40,40,40,0.9);
+    -fx-text-fill: -fx-text-color-bright;
+    -fx-background-radius: 4;
+    -fx-padding: 6 8 6 8;
+    -fx-font-family: -fx-font-body;
+    -fx-font-style: italic;
+    -fx-font-size: 12px;
+}
+
+
+/* ==========================================================================
+   Buttons & Controls
+   ========================================================================== */
+.action-button {
+    -fx-text-fill: -fx-text-color-bright;
+    -fx-font-family: -fx-font-header;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 3 10 3 10;
+    -fx-background-radius: 7;
+    -fx-border-radius: 7;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0.0, 0, 1);
+    -fx-cursor: hand;
+}
+.action-button:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 8, 0.0, 0, 2);
+}
+
+/* --- Play Button (Green) --- */
+.action-button-play {
+    -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, #75c778 0%, #4CAF50 100%);
+}
+.action-button-play:hover {
+    -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, #89d48c 0%, #75c778 100%);
+}
+
+/* --- Deselect Button (Red) --- */
+.action-button-deselect {
+    -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, #f76b5f 0%, #f44336 100%);
+}
+.action-button-deselect:hover {
+    -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, #f88a81 0%, #f76b5f 100%);
+}
+
+.fire-pit-wrapper {
+    -fx-background-color: #30343A;
+    -fx-border-color: #50545A;
+    -fx-border-width: 1.5;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+}
+
+
+/* ==========================================================================
+   Dialogs
+   ========================================================================== */
+.game-dialog-pane {
+    -fx-font-family: -fx-font-body;
+    -fx-background-color: -fx-secondary-background;
+}
+.game-dialog-pane .content.label {
+    -fx-text-fill: -fx-text-color;
+}
+.game-dialog-pane .header-panel {
+    -fx-background-color: -fx-primary-background;
+}
+.game-dialog-pane .header-panel .label {
+    -fx-font-size: 1.2em;
+    -fx-font-family: -fx-font-header;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-text-color-bright;
+}
+
+/* ScrollPane styling for the cards area */
+.card-scroll-pane {
+    -fx-background: transparent;
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.card-scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.card-scroll-pane > .scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.card-scroll-pane > .scroll-bar > .thumb {
+    -fx-background-color: rgba(255, 255, 255, 0.3);
+    -fx-background-radius: 5;
+}
+
+.card-scroll-pane > .scroll-bar > .thumb:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.4);
+}
+
+.card-scroll-pane > .scroll-bar > .track {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+    -fx-background-radius: 5;
+}
+
+.card-scroll-pane > .corner {
+    -fx-background-color: transparent;
+}
