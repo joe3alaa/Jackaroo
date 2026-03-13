@@ -6,8 +6,6 @@ import engine.board.BoardManager;
 import exception.GameException;
 import model.Colour;
 import model.card.Card;
-import model.card.standard.Queen;
-import model.card.standard.Ten;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,13 +27,18 @@ public class CPU extends Player {
         for (Card card : cards) {
             this.selectCard(card);
 
-            // 1. Try Zero-Marble Actions (Discard/Skip/Fielding)
-            if (card instanceof Ten || card instanceof Queen || card.validateMarbleSize(new ArrayList<>())) {
+            // 1. Try zero-marble actions (fielding, discard/skip) when the card supports them.
+            //
+            // Previously this guard was:
+            //   card instanceof Ten || card instanceof Queen || card.validateMarbleSize(new ArrayList<>())
+            //
+            // The instanceof checks are redundant: Ten and Queen both override validateMarbleSize()
+            // to return true for an empty list, so the third clause already covers them.
+            // Keeping the instanceof checks would require updating this method every time a new
+            // "zero-marble-capable" card is added — exactly the fragility we are removing.
+            if (card.validateMarbleSize(new ArrayList<>())) {
                 try {
-                    // <<< FIX: Validate FIRST >>>
                     card.validate(new ArrayList<>(), this.game);
-                    
-                    // If valid, then ACT
                     System.out.println("CPU " + getName() + ": Playing " + card.getName() + " (No marbles)");
                     getSelectedCard().act(new ArrayList<>(), this.game, result);
                     return;

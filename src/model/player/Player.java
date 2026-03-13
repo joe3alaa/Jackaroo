@@ -13,9 +13,7 @@ import exception.InvalidMarbleException;
 import exception.MarbleSelectionNeededException;
 import model.Colour;
 import model.card.Card;
-import model.card.standard.Standard;
 
-@SuppressWarnings("unused")
 public class Player {
     private final String name;
     private final Colour colour;
@@ -145,38 +143,23 @@ public class Player {
         selectedCard.act(selectedMarbles, game, result);
     }
 
-    // NEW HELPER METHOD: doesCardRequireMarbles
+    // HELPER METHOD: doesCardRequireMarbles
+    //
+    // Ask the card itself whether it can act on zero marbles — don't guess by name.
+    //
+    // The previous version used card.getName().toUpperCase().contains("ACE") and similar
+    // string checks. That is a Tell-Don't-Ask violation: Player was classifying cards
+    // by their names instead of querying their declared behaviour.
+    //
+    // The Card hierarchy already encodes this capability via validateMarbleSize():
+    //   - Ace/King/Queen/Ten override it to accept an empty list   → they do NOT require marbles
+    //   - Everything else (Standard, Four, Five, Jack, Seven, ...) → they DO require marbles
+    //
+    // One call to validateMarbleSize(emptyList) is the only authoritative answer.
+    // Renaming "Ace" to "As" tomorrow would silently break 8 string checks; it will
+    // never break this one.
     private boolean doesCardRequireMarbles(Card card) {
-        // This is a simplified check.
-        // Cards like Ace, King, Queen, Ten can have 0-marble actions (field/discard)
-        // OR 1-marble actions (move). If 0 marbles are selected for these,
-        // validateMarbleSize will check if the 0-marble action is valid.
-        // We are interested if the *primary intended action for an empty selection* would typically need a marble.
-        String cardNameUpper = card.getName().toUpperCase();
-
-        if (cardNameUpper.contains("ACE") || cardNameUpper.contains("KING") ||
-            cardNameUpper.contains("QUEEN") || cardNameUpper.contains("TEN")) {
-            // These have dual nature. If selectedMarbles is empty, validateMarbleSize
-            // will determine if their 0-marble action (fielding/discarding) is valid.
-            // So, for our check, if selectedMarbles is empty, we don't *strictly* require one *yet*.
-            // The MarbleSelectionNeededException is for when the player *intends* a marble action
-            // but forgets to click.
-            // If validateMarbleSize later fails for 0 marbles (e.g. cannot field/discard),
-            // it will throw InvalidMarbleException.
-            return false; // Let validateMarbleSize handle 0-marble cases for these dual-nature cards.
-        }
-
-        // Cards that almost always require marbles if they are to do anything beyond being a "Standard" card.
-        if (card instanceof Standard || // Includes numeric cards and special cards acting as standard
-            cardNameUpper.contains("FOUR") ||
-            cardNameUpper.contains("FIVE") ||
-            cardNameUpper.contains("JACK") || // Requires 1 or 2
-            cardNameUpper.contains("SEVEN") || // Requires 1 or 2
-            cardNameUpper.contains("SAVER") ||
-            cardNameUpper.contains("BURNER")) {
-            return true;
-        }
-        return false; // Default, or for cards with no marble interaction.
+        return !card.validateMarbleSize(new ArrayList<>());
     }
 
     // NEW HELPER METHOD: playerHasActionableMarblesOnBoard
