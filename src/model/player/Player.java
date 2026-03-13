@@ -20,8 +20,9 @@ public class Player {
     private final ArrayList<Marble> selectedMarbles; // Marbles selected for action
     // Player depends on the GameManager INTERFACE, not the concrete Game class.
     // This is the key architectural fix: the model layer must not reference the
-    // engine implementation. Game implements GameManager, so Game.setGameReference(this)
-    // still works through polymorphism — but Player no longer knows about Game.
+    // engine implementation. When Game calls player.setGameReference(this), the
+    // Game instance is accepted as a GameManager through polymorphism — but
+    // Player never needs to know that Game exists.
     protected GameManager game;
 
     public Player(String name, Colour colour) {
