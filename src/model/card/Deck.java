@@ -21,11 +21,24 @@ import model.card.standard.Ten;
 import model.card.wild.Burner;
 import model.card.wild.Saver;
 
+// WHY THIS CHANGED:
+//
+// Deck was a static singleton: one shared ArrayList<Card> for the entire JVM.
+// That meant every Card ever created held a permanent reference to the
+// BoardManager and GameManager that were current when loadCardPool() ran.
+// Starting a second game — or even writing a unit test that creates a
+// Board — silently corrupted the first game's cards.
+//
+// The fix is the simplest one that removes the static state: make cardsPool
+// an instance field and turn every static method into an instance method.
+// Deck is now owned by DeckManager, which is owned by Game.  Each Game
+// gets its own Deck with its own card pool.  No global state survives
+// between games.
 public class Deck {
     private static final String CARDS_FILE = "Cards.csv";
-    static private ArrayList<Card> cardsPool;
+    private ArrayList<Card> cardsPool;
 
-    public static void loadCardPool(BoardManager boardManager, GameManager gameManager) throws IOException {
+    public Deck(BoardManager boardManager, GameManager gameManager) throws IOException {
         cardsPool = new ArrayList<>();
 
 		try (BufferedReader br = new BufferedReader(new FileReader(CARDS_FILE))) {
@@ -81,18 +94,18 @@ public class Deck {
 		}
     }
 
-    public static ArrayList<Card> drawCards() {
+    public ArrayList<Card> drawCards() {
         Collections.shuffle(cardsPool);
         ArrayList<Card> cards = new ArrayList<>(cardsPool.subList(0, 4));
         cardsPool.subList(0, 4).clear();
         return cards;
     }
     
-    public static int getPoolSize() {
+    public int getPoolSize() {
 		return cardsPool.size();
 	}
 
-    public static void refillPool(ArrayList<Card> cards) {
+    public void refillPool(ArrayList<Card> cards) {
         cardsPool.addAll(cards);
     }
 
