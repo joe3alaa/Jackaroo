@@ -12,11 +12,12 @@ import java.util.ArrayList;
  * 
  * RESPONSIBILITY: Knows about card distribution and recycling.
  * 
- * Design Decision: This class is a COORDINATOR between Deck (static utility)
- * and the game's fire pit. It bridges the gap.
+ * Design Decision: This class OWNS a Deck instance and coordinates
+ * between it and the fire pit.  Each Game gets its own DeckManager
+ * with its own Deck — no static state is shared between games.
  * 
  * @author Your Name
- * @version 2.0
+ * @version 3.0
  */
 public class DeckManager {
     
@@ -29,6 +30,14 @@ public class DeckManager {
     private final ArrayList<Card> firePit;
     
     /**
+     * The deck instance that owns the card pool for this game.
+     * Previously Deck was a static singleton — every DeckManager (and every
+     * Game) shared the same card pool.  Now each DeckManager owns its own
+     * Deck, so two games can coexist without corrupting each other's state.
+     */
+    private final Deck deck;
+    
+    /**
      * Number of cards each player receives per round.
      * This is a game constant but stored here for clarity.
      */
@@ -37,13 +46,29 @@ public class DeckManager {
     // ==================== CONSTRUCTOR ====================
     
     /**
-     * Creates a new DeckManager with an empty fire pit.
+     * Creates a new DeckManager that owns the given Deck.
+     *
+     * @param deck the Deck instance for this game (must not be null)
      */
-    public DeckManager() {
+    public DeckManager(Deck deck) {
+        if (deck == null) {
+            throw new IllegalArgumentException("Deck cannot be null");
+        }
         this.firePit = new ArrayList<>();
+        this.deck = deck;
     }
     
     // ==================== PUBLIC METHODS ====================
+
+    /**
+     * Draws a hand of cards from the deck.
+     * Delegates to the owned Deck instance.
+     *
+     * @return a new hand of cards
+     */
+    public ArrayList<Card> drawCards() {
+        return deck.drawCards();
+    }
     
     /**
      * Discards a card to the fire pit.
@@ -104,15 +129,15 @@ public class DeckManager {
         int cardsNeeded = players.size() * CARDS_PER_HAND;
         
         // Step 1: Check if we need to refill the deck
-        if (Deck.getPoolSize() < cardsNeeded) {
+        if (deck.getPoolSize() < cardsNeeded) {
             refillDeckFromFirePit();
         }
         
         // Step 2: Verify we now have enough cards
-        if (Deck.getPoolSize() < cardsNeeded) {
+        if (deck.getPoolSize() < cardsNeeded) {
             throw new IllegalStateException(
                 "CRITICAL ERROR: Cannot deal new round. " +
-                "Deck size: " + Deck.getPoolSize() + 
+                "Deck size: " + deck.getPoolSize() + 
                 ", Fire pit size: " + firePit.size() + 
                 ", Cards needed: " + cardsNeeded
             );
@@ -120,7 +145,7 @@ public class DeckManager {
         
         // Step 3: Deal to each player
         for (Player player : players) {
-            player.setHand(Deck.drawCards());
+            player.setHand(deck.drawCards());
         }
     }
     
@@ -171,12 +196,12 @@ public class DeckManager {
         }
         
         // Transfer cards from fire pit back to deck
-        Deck.refillPool(new ArrayList<>(firePit)); // Pass a copy to be safe
+        deck.refillPool(new ArrayList<>(firePit)); // Pass a copy to be safe
         firePit.clear();
         
         System.out.println(
             "INFO: Deck refilled from fire pit. " +
-            "New deck size: " + Deck.getPoolSize()
+            "New deck size: " + deck.getPoolSize()
         );
     }
 }

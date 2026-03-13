@@ -83,18 +83,23 @@ public class Game implements GameManager {
             throw new IllegalArgumentException("Player name cannot be null or empty");
         }
         
-        // Initialize managers FIRST
+        // Initialize turn manager (no dependencies)
         this.turnManager = new TurnManager();
-        this.deckManager = new DeckManager();
         
         // Randomly assign colors
         ArrayList<Colour> allColours = new ArrayList<>(Arrays.asList(Colour.values()));
         Collections.shuffle(allColours);
         this.playerColourOrder = new ArrayList<>(allColours.subList(0, 4));
         
-        // Create board and load deck
+        // Create board (needs GameManager = this)
         this.board = new Board(this.playerColourOrder, this);
-        Deck.loadCardPool(this.board, this);
+
+        // Create deck instance and deck manager.
+        // Deck must be created AFTER Board because card construction needs
+        // a BoardManager.  DeckManager now owns the Deck — no static state
+        // survives between Game instances.
+        Deck deck = new Deck(this.board, this);
+        this.deckManager = new DeckManager(deck);
         
         // Initialize win checker AFTER board exists
         this.winChecker = new WinConditionChecker(this.board);
@@ -112,9 +117,9 @@ public class Game implements GameManager {
             this.players.add(cpuPlayer);
         }
         
-        // Deal initial hands
+        // Deal initial hands through DeckManager (not static Deck)
         for (Player p : this.players) {
-            p.setHand(Deck.drawCards());
+            p.setHand(deckManager.drawCards());
         }
     }
     
