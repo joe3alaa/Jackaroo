@@ -33,6 +33,12 @@ public abstract class Card {
     public String getDescription() {
         return description;
     }
+
+    // Exposes the board manager so that callers (e.g. Player) can query board
+    // state through the interface instead of reaching into the concrete Game class.
+    public BoardManager getBoardManager() {
+        return boardManager;
+    }
     
     /**
      * Executes the action - now delegates to strategy.

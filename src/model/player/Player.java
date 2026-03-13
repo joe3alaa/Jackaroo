@@ -2,11 +2,8 @@ package model.player;
 
 import java.util.ArrayList;
 
-import engine.Game;
+import engine.GameManager;
 import engine.action.ActionResult;
-import engine.board.Board;
-import engine.board.Cell;
-import engine.board.SafeZone;
 import exception.GameException;
 import exception.InvalidCardException;
 import exception.InvalidMarbleException;
@@ -21,7 +18,12 @@ public class Player {
     private final ArrayList<Marble> marbles; // Home zone marbles
     private Card selectedCard;
     private final ArrayList<Marble> selectedMarbles; // Marbles selected for action
-    protected Game game; // Already exists, ensure it's set
+    // Player depends on the GameManager INTERFACE, not the concrete Game class.
+    // This is the key architectural fix: the model layer must not reference the
+    // engine implementation. When Game calls player.setGameReference(this), the
+    // Game instance is accepted as a GameManager through polymorphism — but
+    // Player never needs to know that Game exists.
+    protected GameManager game;
 
     public Player(String name, Colour colour) {
         this.name = name;
@@ -36,8 +38,7 @@ public class Player {
         // this.game = null; // Initialized by Game class
     }
     
-    // NEW METHOD TO SET GAME REFERENCE
-    public void setGameReference(Game gameInstance) {
+    public void setGameReference(GameManager gameInstance) {
         this.game = gameInstance;
     }
 
@@ -116,7 +117,7 @@ public class Player {
         boolean cardRequiresMarblesForPrimaryAction = doesCardRequireMarbles(selectedCard);
 
         if (cardRequiresMarblesForPrimaryAction && selectedMarbles.isEmpty()) {
-            if (this.game != null && playerHasActionableMarblesOnBoard(this.game.getBoard())) {
+            if (this.game != null && playerHasActionableMarblesOnBoard()) {
                 throw new MarbleSelectionNeededException(); // Throw specific exception
             } else {
                 // If no actionable marbles, then it's a genuine InvalidMarbleException
@@ -162,31 +163,15 @@ public class Player {
         return !card.validateMarbleSize(new ArrayList<>());
     }
 
-    // NEW HELPER METHOD: playerHasActionableMarblesOnBoard
-    private boolean playerHasActionableMarblesOnBoard(Board board) {
-        if (board == null) return false; // Safety check
-
-        // Check track
-        for (Cell cell : board.getTrack()) {
-            if (cell.getMarble() != null && cell.getMarble().getColour() == this.colour) {
-                // Further check: Is this marble actually movable? (not blocked, etc.)
-                // For simplicity here, we'll just check if they have *any* marble on track.
-                // A more sophisticated check would involve board.getActionableMarbles()
-                // or trying to simulate a move.
-                return true;
-            }
-        }
-        // Check safe zone (marbles in safe zone can also be moved by some cards or within safe zone)
-        for (SafeZone sz : board.getSafeZones()) {
-            if (sz.getColour() == this.colour) {
-                for (Cell safeCell : sz.getCells()) {
-                    if (safeCell.getMarble() != null) { // Already implies it's this player's colour
-                        return true;
-                    }
-                }
-            }
-        }
-        return false; // No marbles of this player's colour found on track or in their safe zone.
+    // Uses BoardManager.getActionableMarbles() through the selected card's
+    // board manager instead of reaching into Game.getBoard(). This keeps the
+    // model layer decoupled from the engine — Player never needs to know that
+    // Game exists.
+    private boolean playerHasActionableMarblesOnBoard() {
+        if (selectedCard == null) return false;
+        var bm = selectedCard.getBoardManager();
+        if (bm == null) return false;
+        return !bm.getActionableMarbles().isEmpty();
     }
 
     

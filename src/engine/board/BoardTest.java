@@ -56,7 +56,7 @@ class BoardTest {
         
         board = new Board(colorOrder, mockGameManager);
         testPlayer = new Player("TestPlayer", Colour.GREEN);
-        testPlayer.setGameReference((engine.Game) mockGameManager); // Cast if needed
+        testPlayer.setGameReference(mockGameManager);
         testMarble = testPlayer.getOneMarble();
         testResult = new ActionResult(testPlayer, null);
     }
