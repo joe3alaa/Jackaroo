@@ -25,13 +25,11 @@ public class Deck {
     private static final String CARDS_FILE = "Cards.csv";
     static private ArrayList<Card> cardsPool;
 
-    @SuppressWarnings("resource")
-	public static void loadCardPool(BoardManager boardManager, GameManager gameManager) throws IOException {
+    public static void loadCardPool(BoardManager boardManager, GameManager gameManager) throws IOException {
         cardsPool = new ArrayList<>();
 
-		BufferedReader br = new BufferedReader(new FileReader(CARDS_FILE));
-
-		while (br.ready()) {
+		try (BufferedReader br = new BufferedReader(new FileReader(CARDS_FILE))) {
+			while (br.ready()) {
 			String nextLine = br.readLine();
 			String[] data = nextLine.split(",");
 			
@@ -80,6 +78,7 @@ public class Deck {
 				cardsPool.add(card);
 			}	
         }
+		}
     }
 
     public static ArrayList<Card> drawCards() {
